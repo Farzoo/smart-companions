@@ -1,0 +1,9 @@
+name: smart-companions
+version: '${project.version}'
+main: farzo.plugins.SmartCompanions
+api-version: 1.19
+
+commands:
+  summonAllay:
+    description: Create an Allay
+    usage: /<command>
