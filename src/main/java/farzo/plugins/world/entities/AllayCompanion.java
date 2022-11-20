@@ -5,10 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import farzo.plugins.world.PreventChunkUnloading;
-import farzo.plugins.world.entities.ai.StayCloseToOwner;
-import farzo.plugins.world.inventory.AllayCompanionMenu;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import farzo.plugins.world.entities.ai.goal.StayCloseToOwner;
+import farzo.plugins.world.menu.AllayCompanionMenuProvider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -36,6 +34,8 @@ import net.minecraft.world.entity.schedule.Activity;
 
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 
 import javax.annotation.Nullable;
@@ -44,7 +44,7 @@ import java.util.*;
 public class AllayCompanion extends Allay implements OwnableEntity, HasCustomInventoryScreen, RangedAttackMob {
 
     protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(AllayCompanion.class, EntityDataSerializers.OPTIONAL_UUID);
-    private final AllayCompanionMenu menu = new AllayCompanionMenu(this);
+    private final AllayCompanionMenuProvider menu = new AllayCompanionMenuProvider(this);
     private final SimpleContainer inventory = new SimpleContainer(54);
 
     protected static final ImmutableList<SensorType<? extends Sensor<? super AllayCompanion>>> SENSOR_TYPES;
@@ -52,10 +52,15 @@ public class AllayCompanion extends Allay implements OwnableEntity, HasCustomInv
 
     static {
         SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS);
-        MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.HURT_BY, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryModuleType.IS_PANICKING, new MemoryModuleType[0]);
+        MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.HURT_BY, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryModuleType.IS_PANICKING);
     }
 
     private PreventChunkUnloading pcu;
+
+    @Override
+    public void travel(Vec3 vec3d) {
+        super.travel(vec3d);
+    }
 
     private void init() {
         this.setPersistenceRequired();
@@ -63,13 +68,14 @@ public class AllayCompanion extends Allay implements OwnableEntity, HasCustomInv
     }
 
     public AllayCompanion(EntityType<? extends Allay> entitytypes, Level world) {
-        super(EntityType.ALLAY, world);
+        super(CustomEntities.ALLAY_COMPANION.getNmsEntityType(), world);
         this.init();
     }
 
     public AllayCompanion(EntityType<? extends Allay> entitytypes, Level world, Player player) {
-        this(entitytypes, world);
-        this.setOwnerUUID(player.getUUID());
+        this(CustomEntities.ALLAY_COMPANION.getNmsEntityType(), world);
+        if (player != null) this.setOwnerUUID(player.getUUID());
+        this.init();
     }
 
     protected void defineSynchedData() {
@@ -79,7 +85,7 @@ public class AllayCompanion extends Allay implements OwnableEntity, HasCustomInv
 
     @Override
     public void tick() {
-        if(this.pcu != null) this.pcu.setLastChunk();
+        if(this.pcu != null) this.pcu.tick();
         super.tick();
     }
 
@@ -120,6 +126,7 @@ public class AllayCompanion extends Allay implements OwnableEntity, HasCustomInv
 
     public void setOwnerUUID(@Nullable UUID ownerUUID) {
         this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(ownerUUID));
+        if(this.getOwner() != null) this.setCustomName(this.getOwner().getDisplayName());
     }
 
     @Nullable
@@ -139,7 +146,6 @@ public class AllayCompanion extends Allay implements OwnableEntity, HasCustomInv
     public EntityType<? extends Entity> getType() {
         return CustomEntities.ALLAY_COMPANION.getEntityType();
     }
-
 
     @Override
     public SimpleContainer getInventory() {

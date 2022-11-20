@@ -1,8 +1,10 @@
-package farzo.plugins.world.entities.ai;
+package farzo.plugins.world.entities.ai.goal;
 
 import farzo.plugins.world.entities.AllayCompanion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -18,12 +20,12 @@ import org.bukkit.event.entity.EntityTeleportEvent;
 
 import java.util.EnumSet;
 
-public class FollowPlayerGoal extends Goal {
+public class FollowPlayerGoal<T extends PathfinderMob & OwnableEntity> extends Goal {
     public static final int TELEPORT_WHEN_DISTANCE_IS = 12;
     private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
     private static final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
     private static final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1;
-    private final AllayCompanion follower;
+    private final T follower;
     private net.minecraft.world.entity.LivingEntity owner;
     private final LevelReader level;
     private final double speedModifier;
@@ -34,7 +36,7 @@ public class FollowPlayerGoal extends Goal {
     private float oldWaterCost;
     private final boolean canFly;
 
-    public FollowPlayerGoal(AllayCompanion follower, double speedModifier, float startDistance, float stopDistance, boolean canFly) {
+    public FollowPlayerGoal(T follower, double speedModifier, float startDistance, float stopDistance, boolean canFly) {
         this.follower = follower;
         this.owner = (LivingEntity) this.follower.getOwner();
         this.level = follower.getLevel();
@@ -86,10 +88,9 @@ public class FollowPlayerGoal extends Goal {
             if (!this.follower.isLeashed() && !this.follower.isPassenger()) {
                 if (this.follower.distanceToSqr(this.owner) >= 144.0D) {
                     this.teleportToOwner();
-                } else {
-                    this.follower.travel(this.owner.getPosition(1));
-                    //this.navigation.moveTo(this.owner, this.speedModifier);
                 }
+                //this.follower.travel(this.owner.getPosition(1));
+                this.navigation.moveTo(this.owner, this.speedModifier);
             }
         }
 
@@ -117,7 +118,7 @@ public class FollowPlayerGoal extends Goal {
             return false;
         } else {
             CraftEntity entity = this.follower.getBukkitEntity();
-            Location to = new Location(entity.getWorld(), (double)i + 0.5D, (double)j, (double)k + 0.5D, this.follower.getYRot(), this.follower.getXRot());
+            Location to = new Location(entity.getWorld(), (double)i + 0.5D, j, (double)k + 0.5D, this.follower.getYRot(), this.follower.getXRot());
             EntityTeleportEvent event = new EntityTeleportEvent(entity, entity.getLocation(), to);
             this.follower.getBukkitEntity().getServer().getPluginManager().callEvent(event);
             if (event.isCancelled()) {

@@ -1,4 +1,4 @@
-package farzo.plugins.world.entities.ai;
+package farzo.plugins.world.entities.ai.goal;
 
 import farzo.plugins.world.entities.AllayCompanion;
 import net.minecraft.core.BlockPos;

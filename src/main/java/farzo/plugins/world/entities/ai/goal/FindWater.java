@@ -1,4 +1,4 @@
-package farzo.plugins.world.entities.ai;
+package farzo.plugins.world.entities.ai.goal;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;

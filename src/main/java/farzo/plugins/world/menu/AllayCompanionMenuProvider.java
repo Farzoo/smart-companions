@@ -1,4 +1,4 @@
-package farzo.plugins.world.inventory;
+package farzo.plugins.world.menu;
 
 import farzo.plugins.world.entities.AllayCompanion;
 import net.minecraft.network.chat.Component;
@@ -10,11 +10,11 @@ import net.minecraft.world.inventory.ChestMenu;
 
 import javax.annotation.Nullable;
 
-public class AllayCompanionMenu implements MenuProvider {
+public class AllayCompanionMenuProvider implements MenuProvider {
 
     private final AllayCompanion entity;
 
-    public AllayCompanionMenu(AllayCompanion entity) {
+    public AllayCompanionMenuProvider(AllayCompanion entity) {
         this.entity = entity;
     }
     @Override
@@ -25,7 +25,6 @@ public class AllayCompanionMenu implements MenuProvider {
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-
         return ChestMenu.sixRows(i, inventory, this.entity.getInventory());
     }
 }
