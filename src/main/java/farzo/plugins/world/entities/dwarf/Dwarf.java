@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Dwarf extends Pillager implements Npc, HasCustomInventoryScreen, InventoryCarrier, OwnableEntity, HasHome, BlockTargeter {
+public class Dwarf extends PathfinderMob implements Npc, HasCustomInventoryScreen, InventoryCarrier, OwnableEntity, HasHome, BlockTargeter {
 
     protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(Dwarf.class, EntityDataSerializers.OPTIONAL_UUID);
     protected static final EntityDataAccessor<Optional<BlockPos>> DATA_HOME_POS = SynchedEntityData.defineId(Dwarf.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
@@ -42,13 +42,18 @@ public class Dwarf extends Pillager implements Npc, HasCustomInventoryScreen, In
     private PreventChunkUnloading pcu;
     private final SimpleContainer inventory = new SimpleContainer(54);
     private BlockPos home = null;
-    private BlockPos targetBlock;
+    private BlockPos targetBlock = null;
 
     // goal minage (class block..., maxDistance,
     // Goal bring items
     // target home selector
     // Goal go home
 
+
+    @Override
+    public boolean canTakeItem(ItemStack itemstack) {
+        return super.canTakeItem(itemstack);
+    }
 
     public Dwarf(EntityType<? extends PathfinderMob> entitytypes, Level world) {
         super(CustomEntities.DWARF.getNmsEntityType(), world);

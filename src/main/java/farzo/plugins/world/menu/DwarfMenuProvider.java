@@ -2,6 +2,7 @@ package farzo.plugins.world.menu;
 
 import farzo.plugins.world.entities.ai.goal.FollowPlayerGoal;
 import farzo.plugins.world.entities.dwarf.Dwarf;
+import farzo.plugins.world.entities.dwarf.DwarfFollowAction;
 import farzo.plugins.world.entities.dwarf.DwarfHarvestAction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -71,9 +72,20 @@ public class DwarfMenuProvider implements MenuProvider {
         followItemMeta.setDisplayName(ChatColor.YELLOW + "Follow");
         followItemMeta.setLore(List.of("Demander à " + ChatColor.BOLD + menuHolder.getBukkitEntity().getCustomName() + " de vous suivre"));
         followItem.setItemMeta(followItemMeta);
-
         container.setItem(0,
                 CraftItemStack.asNMSCopy(followItem),
+                new DwarfFollowAction(menuHolder, interactor)
+        );
+
+
+        ItemStack harvestWoodItem = new ItemStack(Material.NETHERITE_AXE);
+        ItemMeta harvestWoodItemMeta = harvestWoodItem.getItemMeta();
+        harvestWoodItemMeta.setDisplayName(ChatColor.GREEN + "Harvest woods");
+        harvestWoodItemMeta.setLore(List.of("Demander à " + ChatColor.BOLD + menuHolder.getBukkitEntity().getCustomName() + " de récupérer le bois autour.", "Prix : " + ChatColor.UNDERLINE + " 15 émeraudes"));
+        harvestWoodItem.setItemMeta(harvestWoodItemMeta);
+
+        container.setItem(1,
+                CraftItemStack.asNMSCopy(harvestWoodItem),
                 new DwarfHarvestAction(
                         menuHolder,
                         interactor,
@@ -81,19 +93,6 @@ public class DwarfMenuProvider implements MenuProvider {
                         Set.of(Blocks.ACACIA_LOG, Blocks.OAK_LOG, Blocks.DARK_OAK_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.SPRUCE_LOG, Blocks.MANGROVE_LOG),
                         Set.of(Blocks.ACACIA_LOG, Blocks.OAK_LOG, Blocks.DARK_OAK_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.SPRUCE_LOG, Blocks.MANGROVE_LOG, Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES))
         );
-
-        ItemStack harvestWoodItem = new ItemStack(Material.NETHERITE_AXE);
-        ItemMeta harvestWoodItemMeta = harvestWoodItem.getItemMeta();
-        harvestWoodItemMeta.setDisplayName(ChatColor.GREEN + "Harvest woods");
-        harvestWoodItemMeta.setLore(List.of("Demander à " + ChatColor.BOLD + menuHolder.getBukkitEntity().getCustomName() + " de récupérer le bois autour.", "Prix : " + ChatColor.UNDERLINE + " 10 émeraudes"));
-        harvestWoodItem.setItemMeta(harvestWoodItemMeta);
-
-        container.setItem(1,
-                CraftItemStack.asNMSCopy(harvestWoodItem),
-                (menu, i) -> {
-
-                }
-        );
-        return new DwarfMenuProvider(container, MenuType.GENERIC_9x2);
+        return new DwarfMenuProvider(container, MenuType.GENERIC_9x1);
     }
 }
